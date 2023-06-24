@@ -64,6 +64,7 @@ func (p *Parser) parseLetStatement() *ast.LetStatement {
 		return nil
 	}
 
+	// TODO: support expression
 	for !p.curTokenIs(token.SEMICOLON) {
 		p.nextToken()
 	}
