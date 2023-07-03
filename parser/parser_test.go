@@ -319,29 +319,39 @@ func TestOperatorPrecedenceParsing(t *testing.T) {
 }
 
 func TestBooleanExpression(t *testing.T) {
-	input := "true;"
-
-	l := lexer.New(input)
-	p := New(l)
-	program := p.ParseProgram()
-	checkParserErrors(t, p)
-	if len(program.Statements) != 1 {
-		t.Fatalf("program has not enough statements. got=%d", len(program.Statements))
-	}
-	stmt, ok := program.Statements[0].(*ast.ExpressionStatement)
-	if !ok {
-		t.Fatalf("program.Statements[0] is not ast.ExpressionStatement. got=%T", program.Statements[0])
+	tests := []struct {
+		input           string
+		expectedBoolean bool
+	}{
+		{"true;", true},
+		{"false;", false},
 	}
 
-	ident, ok := stmt.Expression.(*ast.Boolean)
-	if !ok {
-		t.Fatalf("exp not *ast.Boolean. got=%T", stmt.Expression)
-	}
-	if ident.Value != true {
-		t.Errorf("ident.Value not %t. got=%t", true, ident.Value)
-	}
-	if ident.TokenLiteral() != "true" {
-		t.Errorf("ident.TokenLiteral not %s. got=%s", "true", ident.TokenLiteral())
+	for _, tt := range tests {
+		l := lexer.New(tt.input)
+		p := New(l)
+		program := p.ParseProgram()
+		checkParserErrors(t, p)
+
+		if len(program.Statements) != 1 {
+			t.Fatalf("program has not enough statements. got=%d",
+				len(program.Statements))
+		}
+
+		stmt, ok := program.Statements[0].(*ast.ExpressionStatement)
+		if !ok {
+			t.Fatalf("program.Statements[0] is not ast.ExpressionStatement. got=%T",
+				program.Statements[0])
+		}
+
+		boolean, ok := stmt.Expression.(*ast.Boolean)
+		if !ok {
+			t.Fatalf("exp not *ast.Boolean. got=%T", stmt.Expression)
+		}
+		if boolean.Value != tt.expectedBoolean {
+			t.Errorf("boolean.Value not %t. got=%t", tt.expectedBoolean,
+				boolean.Value)
+		}
 	}
 }
 
